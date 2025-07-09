@@ -1435,7 +1435,7 @@ end
 
 function script_defaults(settings)
     -- Default values for the script
-    obs.obs_data_set_default_double(settings, "zoom_value", 2)
+    obs.obs_data_set_default_double(settings, "zoom_value", 15)
     obs.obs_data_set_default_double(settings, "zoom_speed", 0.06)
     obs.obs_data_set_default_bool(settings, "follow", true)
     obs.obs_data_set_default_bool(settings, "follow_outside_bounds", false)
