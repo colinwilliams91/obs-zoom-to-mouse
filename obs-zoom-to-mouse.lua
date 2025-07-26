@@ -825,6 +825,9 @@ function on_toggle_follow(pressed)
     end
 end
 
+-- TODO: add a 3rd state to ZoomState enum and modify ZoomState.ZoomedIn to accomodate this
+-- TODO: add another zoom_value_two const (or something like it) to dynamically zoom based on state 1 or state 2
+-- TODO: zoom state 1 value should be 10x and state 2 should be 15x (zoom_value is currently 15x)
 function on_toggle_zoom(pressed)
     if pressed then
         -- Check if we are in a safe state to zoom
