@@ -3,8 +3,6 @@
 -- An OBS lua script to zoom a display-capture source to focus on the mouse.
 -- Copyright (c) BlankSourceCode.  All rights reserved.
 --
--- Modifications to include 3rd zoom state by @colinwilliams91
--- 
 
 local obs = obslua
 local ffi = require("ffi")
@@ -75,13 +73,6 @@ local socket_poll = 1000
 local debug_logs = false
 local is_obs_loaded = false
 local is_script_loaded = false
-
-local ZoomStage = {
-    None = 0,
-    First = 1,
-    Last = 2,
-}
-local zoom_stage = ZoomStage.None
 
 local ZoomState = {
     None = 0,
@@ -834,15 +825,11 @@ function on_toggle_follow(pressed)
     end
 end
 
--- TODO: ~~add a 3rd state to ZoomState enum and modify ZoomState.ZoomedIn to accomodate this~~
--- TODO: ~~add another zoom_value_two const (or something like it) to dynamically zoom based on state 1 or state 2~~
--- TODO: ~~zoom state 1 value should be 10x and state 2 should be 15x (zoom_value is currently 15x)~~
--- TODO: extract "zoom_stage" duplicated logic (e.g. lines 863 - 868) into function to use formatted zoom_stage first and last
 function on_toggle_zoom(pressed)
     if pressed then
         -- Check if we are in a safe state to zoom
         if zoom_state == ZoomState.ZoomedIn or zoom_state == ZoomState.None then
-            if zoom_state == ZoomState.ZoomedIn and zoom_stage == ZoomStage.Last then
+            if zoom_state == ZoomState.ZoomedIn then
                 log("Zooming out")
                 -- To zoom out, we set the target back to whatever it was originally
                 zoom_state = ZoomState.ZoomingOut
@@ -858,23 +845,11 @@ function on_toggle_zoom(pressed)
                 log("Zooming in")
                 -- To zoom in, we get a new target based on where the mouse was when zoom was clicked
                 zoom_state = ZoomState.ZoomingIn
-                if zoom_stage == ZoomStage.None then
-                    -- Zooming to first "stage" (10x)
-                    zoom_stage = ZoomStage.First
-                    zoom_info.zoom_to = zoom_value
-                    zoom_time = 0
-                    locked_center = nil
-                    locked_last_pos = nil
-                    zoom_target = get_target_position(zoom_info)
-                elseif zoom_stage == ZoomStage.First then
-                    -- Zooming to last stage (15x)
-                    zoom_stage = ZoomStage.Last
-                    zoom_info.zoom_to = (zoom_value + 5)
-                    zoom_time = 0
-                    locked_center = nil
-                    locked_last_pos = nil
-                    zoom_target = get_target_position(zoom_info)
-                end
+                zoom_info.zoom_to = zoom_value
+                zoom_time = 0
+                locked_center = nil
+                locked_last_pos = nil
+                zoom_target = get_target_position(zoom_info)
             end
 
             -- Since we are zooming we need to start the timer for the animation and tracking
@@ -1460,7 +1435,7 @@ end
 
 function script_defaults(settings)
     -- Default values for the script
-    obs.obs_data_set_default_double(settings, "zoom_value", 10)
+    obs.obs_data_set_default_double(settings, "zoom_value", 15)
     obs.obs_data_set_default_double(settings, "zoom_speed", 0.06)
     obs.obs_data_set_default_bool(settings, "follow", true)
     obs.obs_data_set_default_bool(settings, "follow_outside_bounds", false)
